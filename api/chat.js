@@ -12,29 +12,67 @@ export default async function handler(req, res) {
 
     const AI_API_KEY = process.env.AI_API_KEY;
     const SITE_URL = process.env.SITE_URL || "https://example.vercel.app";
-    const AI_MODEL = process.env.AI_MODEL;
 
     if (!AI_API_KEY) {
-      return res.status(500).json({ error: "Missing AI_API_KEY in Vercel environment variables." });
+      return res.status(500).json({ error: "Missing AI_API_KEY." });
     }
 
-    if (!AI_MODEL) {
-      return res.status(500).json({ error: "Missing AI_MODEL in Vercel environment variables." });
+    // 🔥 List of free models to try (order matters)
+    const models = [
+      "stepfun/step-3.5-flash:free",
+      "google/gemma-3n-e4b-it:free"
+    ];
+
+    for (const model of models) {
+      try {
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${AI_API_KEY}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": SITE_URL,
+            "X-Title": "Beloved Bot"
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              {
+                role: "system",
+                content: "You are Beloved Bot. The user is Angel. Be warm, natural, sweet, playful, and human. Never say you are an AI."
+              },
+              {
+                role: "user",
+                content: String(message).trim()
+              }
+            ],
+            temperature: 0.9,
+            max_tokens: 180
+          })
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (response.ok && data?.choices?.[0]?.message?.content) {
+          return res.status(200).json({
+            reply: data.choices[0].message.content.trim()
+          });
+        }
+
+      } catch (err) {
+        // try next model
+      }
     }
 
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${AI_API_KEY}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": SITE_URL,
-        "X-Title": "Beloved Bot"
-      },
-      body: JSON.stringify({
-        model: AI_MODEL,
-        messages: [
-          {
-            role: "system",
+    return res.status(500).json({
+      error: "All free AI models are currently unavailable. Try again in a moment."
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      error: "Server error"
+    });
+  }
+}            role: "system",
             content: "You are Beloved Bot. The user is Angel. Reply warmly, naturally, sweetly, and like a real person. Be romantic but clean. Never say you are an AI."
           },
           {
