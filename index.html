@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>For Phathutshedzo Hope, from Beloved</title>
+  <title>For Angel, from Beloved</title>
   <style>
     * {
       border: 0;
@@ -603,8 +603,8 @@
             </svg>
           </div>
         </div>
-        <h1 class="chatbot__title">For Phathutshedzo Hope, from Beloved</h1>
-        <p class="chatbot__subtitle">Same original layout feel, but now Angel is the user and Beloved Bot replies.</p>
+        <h1 class="chatbot__title">For Angel, from Beloved</h1>
+        <p class="chatbot__subtitle">Same original layout feel, now wired for a real AI backend on Vercel.</p>
 
         <div class="chatbot__suggestions-box">
           <button class="chatbot__suggestion" data-send="How much does Beloved adore Angel?">How much does Beloved adore Angel?</button>
@@ -710,15 +710,6 @@
     const loaderTemplate = document.getElementById("loader-template");
 
     const placeholder = "Hi Beloved Bot...";
-    let loadingNode = null;
-
-    let recentReplies = [];
-    let conversationMemory = {
-      lastUserMessage: "",
-      lastDetectedGroup: "default",
-      messageCount: 0
-    };
-
     const responseGroups = {
       adore: [
         "Angel, Beloved adores the way your smile quietly changes the whole mood.",
@@ -773,24 +764,6 @@
         "Angel, Beloved thinks your smile and your face work together to cause problems for his focus.",
         "Angel, you have a gentle kind of beauty Beloved really likes."
       ],
-      comfort: [
-        "Angel, come here for a second. Beloved wants you to breathe and be gentle with yourself.",
-        "Angel, even when your heart feels heavy, Beloved still wants you to know you are deeply appreciated.",
-        "Angel, Beloved is right here. You do not have to carry every feeling so harshly by yourself.",
-        "Angel, soft hearts feel deeply, and Beloved wants to handle yours carefully.",
-        "Angel, if today feels a bit too much, Beloved hopes this message lands like a warm hand on your heart.",
-        "Angel, Beloved would rather remind you gently than let you sit alone with heavy thoughts.",
-        "Angel, you are still lovely even on the days you feel quieter or more fragile.",
-        "Angel, Beloved wants peace to find you properly."
-      ],
-      miss: [
-        "Angel, being missed by Beloved is one thing, but the truth is Beloved misses you too in the quiet moments.",
-        "Angel, there is a certain softness missing when you are not around.",
-        "Angel, Beloved notices your absence in the little spaces of the day.",
-        "Angel, missing you has a very quiet way of showing up.",
-        "Angel, you leave a softness behind, so of course Beloved notices when you are not there.",
-        "Angel, your absence has a way of making everything feel slightly less warm."
-      ],
       why: [
         "Beloved likes Angel because you feel genuine and easy to appreciate.",
         "Beloved likes Angel because your smile feels like relief after a long day.",
@@ -800,20 +773,6 @@
         "Beloved likes Angel because your energy stays on the heart.",
         "Beloved likes Angel because being around you feels calm and good.",
         "Beloved likes Angel because you are lovely in both the obvious and quiet ways."
-      ],
-      morning: [
-        "Good morning, Angel. Beloved hopes today feels light, kind, and a little softer because you are in it.",
-        "Good morning, Angel. Beloved hopes your day starts peacefully and gives you reasons to smile.",
-        "Morning, Angel. Just a little reminder from Beloved that you are lovely to think about.",
-        "Good morning, Angel. May your mood be calm and your smile show up often today.",
-        "Morning, Angel. Beloved hopes today treats you gently."
-      ],
-      night: [
-        "Good night, Angel. Beloved hopes your heart rests softly tonight.",
-        "Sleep well, Angel. Beloved hopes peace finds you before sleep does.",
-        "Good night, Angel. You deserve a calm mind and soft rest.",
-        "Rest well, Angel. Beloved hopes tomorrow greets you kindly.",
-        "Good night, Angel. Beloved is sending you a quiet little softness before bed."
       ],
       default: [
         "Angel, Beloved thinks you make the day softer just by being in it.",
@@ -829,36 +788,15 @@
       ]
     };
 
-    const followUps = [
-      "And somehow, Angel, that keeps happening without you even trying.",
-      "Beloved just thought you should know that.",
-      "That is the kind of effect you have.",
-      "Beloved is honestly not even complaining.",
-      "That thought has been sitting gently in Beloved's mind.",
-      "So yes, Angel, that means something."
-    ];
+    let loadingNode = null;
 
-    function pickUnique(list) {
-      let available = list.filter(item => !recentReplies.includes(item));
-      if (!available.length) available = list;
-
-      const choice = available[Math.floor(Math.random() * available.length)];
-      recentReplies.push(choice);
-
-      if (recentReplies.length > 8) {
-        recentReplies.shift();
-      }
-
-      return choice;
+    function randomFrom(list) {
+      return list[Math.floor(Math.random() * list.length)];
     }
 
     function detectGroup(text) {
       const value = text.toLowerCase();
 
-      if (value.includes("good morning") || value.includes("morning")) return "morning";
-      if (value.includes("good night") || value.includes("night") || value.includes("sleep")) return "night";
-      if (value.includes("miss") || value.includes("absence")) return "miss";
-      if (value.includes("sad") || value.includes("hurt") || value.includes("heavy") || value.includes("down") || value.includes("cry")) return "comfort";
       if (value.includes("adore") || value.includes("love") || value.includes("how much")) return "adore";
       if (value.includes("smile") || value.includes("happy") || value.includes("grin")) return "smile";
       if (value.includes("sweet") || value.includes("message") || value.includes("write")) return "sweet";
@@ -868,31 +806,26 @@
       return "default";
     }
 
-    function generateReply(text) {
-      const group = detectGroup(text);
-      conversationMemory.lastDetectedGroup = group;
+    async function generateReply(text) {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: text })
+      });
 
-      let reply = pickUnique(responseGroups[group] || responseGroups.default);
-
-      if (conversationMemory.messageCount > 1 && Math.random() < 0.35) {
-        const followUp = pickUnique(followUps);
-        if (!reply.includes(followUp)) {
-          reply += "\n\n" + followUp;
-        }
+      if (!response.ok) {
+        let message = "Beloved Bot couldn't reply right now.";
+        try {
+          const data = await response.json();
+          if (data && data.error) message = data.error;
+        } catch (error) {}
+        throw new Error(message);
       }
 
-      if (Math.random() < 0.25 && group !== "default") {
-        const extra = pickUnique(responseGroups.default);
-        if (extra !== reply) {
-          reply += "\n\n" + extra;
-        }
-      }
-
-      if (text.toLowerCase().includes("beloved")) {
-        reply += "\n\nAngel, Beloved likes hearing that name from you.";
-      }
-
-      return reply;
+      const data = await response.json();
+      return data.reply || "Beloved Bot is quiet right now.";
     }
 
     function showConversation() {
@@ -973,18 +906,9 @@
       chatTextarea.style.height = Math.max(144, Math.min(chatTextarea.scrollHeight, 260)) + "px";
     }
 
-    function typingDelay(text) {
-      const base = 700;
-      const perChar = Math.min(text.length * 8, 900);
-      return base + perChar + Math.random() * 400;
-    }
-
-    function sendMessage(text, source) {
+    async function sendMessage(text, source) {
       const messageText = (text || "").trim();
       if (!messageText) return;
-
-      conversationMemory.lastUserMessage = messageText;
-      conversationMemory.messageCount += 1;
 
       showConversation();
       appendMessage("user", messageText);
@@ -999,13 +923,16 @@
       setButtonsDisabled(true);
       showLoader();
 
-      const reply = generateReply(messageText);
-
-      setTimeout(() => {
+      try {
+        const reply = await generateReply(messageText);
         hideLoader();
         appendMessage("ai", reply);
+      } catch (error) {
+        hideLoader();
+        appendMessage("ai", error.message || "Beloved Bot had a little issue replying.");
+      } finally {
         setButtonsDisabled(false);
-      }, typingDelay(reply));
+      }
     }
 
     function sendFromWelcome() {
