@@ -67,10 +67,6 @@
       min-height: 100vh;
     }
 
-    ul {
-      margin-inline-start: 1.5em;
-    }
-
     .chatbot {
       display: flex;
       align-items: center;
@@ -91,6 +87,10 @@
       margin: auto;
       padding: 4.5em 1.5em;
       max-width: 33em;
+    }
+
+    .chatbot__welcome[hidden] {
+      display: none;
     }
 
     .chatbot__icon {
@@ -159,6 +159,17 @@
       margin-bottom: 3rem;
     }
 
+    .chatbot__suggestions-box {
+      background-color: var(--gray800);
+      border-radius: 1.5em;
+      box-shadow: 0 4.5em 4.5em hsl(0 0% 0% / 0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75em;
+      padding: 0.75em;
+      width: 100%;
+    }
+
     .chatbot__suggestion {
       background-color: transparent;
       border-radius: 0.75em;
@@ -197,43 +208,9 @@
       opacity: 1;
     }
 
-    .chatbot__suggestion-tag {
-      background-color: var(--gray700);
-      border-radius: 0.375em;
-      color: var(--gray150);
-      cursor: pointer;
-      padding: 0 0.5em;
-    }
-
-    .chatbot__suggestion-tag:disabled {
-      cursor: not-allowed;
-      opacity: 0.5;
-    }
-
-    .chatbot__suggestion-tag:not(:disabled):hover,
-    .chatbot__suggestion-tag:focus-visible {
-      background-color: var(--gray50);
-      color: var(--gray900);
-      outline: none;
-    }
-
-    .chatbot__suggestion-tags {
-      display: flex;
-      gap: 0.5em;
-      flex-wrap: wrap;
-      margin-bottom: 0.75em;
-    }
-
-    .chatbot__suggestions-box {
-      background-color: var(--gray800);
-      border-radius: 1.5em;
-      box-shadow: 0 4.5em 4.5em hsl(0 0% 0% / 0.2);
-      display: flex;
-      flex-direction: column;
-      gap: 0.75em;
-      padding: 0.75em;
+    .chatbot__input-wrapper {
+      position: relative;
       width: 100%;
-      transition: background-color var(--trans-dur);
     }
 
     .chatbot__input {
@@ -248,13 +225,9 @@
       outline: none;
     }
 
-    .chatbot__input::placeholder {
+    .chatbot__input::placeholder,
+    .chatbot__textarea::placeholder {
       color: var(--gray400);
-    }
-
-    .chatbot__input-wrapper {
-      position: relative;
-      width: 100%;
     }
 
     .chatbot__label {
@@ -283,17 +256,15 @@
       height: 2.25em;
     }
 
-    .chatbot__submit:disabled {
+    .chatbot__submit:disabled,
+    .chatbot__suggestion-tag:disabled,
+    .chatbot__suggestion:disabled {
       cursor: not-allowed;
       opacity: 0.5;
     }
 
     .chatbot__submit:not(:disabled):hover {
       background-color: var(--white);
-      box-shadow:
-        0 0 0 0.125em var(--white) inset,
-        0 0.375em 0.25em hsl(0 0% 100% / 0.4) inset,
-        0 1em 1.5em hsl(0 0% 0% / 0.2);
     }
 
     .chatbot__submit--textarea {
@@ -306,7 +277,6 @@
       color: var(--gray950);
       width: 1.25em;
       height: 1.25em;
-      transition: color var(--trans-dur);
       stroke: currentColor;
       fill: none;
       stroke-width: 2;
@@ -324,25 +294,17 @@
       display: flex;
     }
 
-    .chatbot__loader {
-      margin: 0.375em 0;
-      width: 1.5em;
-      height: 1.5em;
-      color: var(--white);
+    .chatbot__message-scroller {
+      flex: 1;
+      overflow: hidden auto;
+      scrollbar-gutter: stable;
     }
 
-    .chatbot__loader-line {
-      animation: loader-line 1s linear infinite;
+    .chatbot__messages {
+      display: flex;
+      flex-direction: column;
+      padding: 0 1.5em;
     }
-
-    .chatbot__loader-line:nth-child(1) { animation-delay: -0.125s; }
-    .chatbot__loader-line:nth-child(2) { animation-delay: -0.25s; }
-    .chatbot__loader-line:nth-child(3) { animation-delay: -0.375s; }
-    .chatbot__loader-line:nth-child(4) { animation-delay: -0.5s; }
-    .chatbot__loader-line:nth-child(5) { animation-delay: -0.625s; }
-    .chatbot__loader-line:nth-child(6) { animation-delay: -0.75s; }
-    .chatbot__loader-line:nth-child(7) { animation-delay: -0.875s; }
-    .chatbot__loader-line:nth-child(8) { animation-delay: -1s; }
 
     .chatbot__message {
       display: flex;
@@ -373,6 +335,45 @@
       flex-shrink: 0;
     }
 
+    .chatbot__message-content {
+      animation: message-appear var(--trans-dur) cubic-bezier(0.65, 0, 0.35, 1);
+      border-radius: 1.75em;
+      padding: 1em 1.25em;
+      padding-inline-end: 1.5em;
+      position: relative;
+      min-width: 3.5em;
+      max-width: min(36em, calc(100vw - 8em));
+    }
+
+    .chatbot__message-role {
+      display: block;
+      font-size: 0.68em;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      opacity: 0.82;
+      margin-bottom: 0.45em;
+      font-weight: 600;
+    }
+
+    .chatbot__message-text {
+      white-space: pre-line;
+    }
+
+    .chatbot__message--user .chatbot__message-content {
+      background: linear-gradient(135deg, var(--blue500), var(--purple350) calc(100% - 1.25em));
+      box-shadow:
+        0 0.375em 0.5em hsl(0 0% 100% / 0.2) inset,
+        0 -0.25em 0.25em hsl(0 0% 0% / 0.1) inset,
+        0 1.5em 1.5em var(--purple350-02);
+      color: var(--white);
+      text-shadow: 0 0 0.25em hsl(0 0% 0% / 0.3);
+    }
+
+    .chatbot__message--ai .chatbot__message-content {
+      background-color: var(--gray800);
+      box-shadow: 0 1.5em 1.5em hsl(0 0% 0% / 0.1);
+    }
+
     .chatbot__message-bubble {
       background-color: var(--purple350);
       border-radius: 50%;
@@ -390,71 +391,6 @@
       height: 0.5em;
     }
 
-    .chatbot__message-content {
-      animation: message-appear var(--trans-dur) cubic-bezier(0.65, 0, 0.35, 1);
-      border-radius: 1.75em;
-      padding: 1em 1.25em;
-      padding-inline-end: 1.5em;
-      position: relative;
-      min-width: 3.5em;
-      max-width: min(36em, calc(100vw - 8em));
-      transition:
-        background-color var(--trans-dur),
-        box-shadow var(--trans-dur);
-    }
-
-    .chatbot__message-role {
-      display: block;
-      font-size: 0.68em;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      opacity: 0.82;
-      margin-bottom: 0.45em;
-      font-weight: 600;
-    }
-
-    .chatbot__message-text {
-      white-space: pre-line;
-    }
-
-    .chatbot__message-text + .chatbot__message-text {
-      margin-top: 1.5em;
-    }
-
-    .chatbot__message--user .chatbot__message-content {
-      background: linear-gradient(135deg, var(--blue500), var(--purple350) calc(100% - 1.25em));
-      box-shadow:
-        0 0.375em 0.5em hsl(0 0% 100% / 0.2) inset,
-        0 -0.25em 0.25em hsl(0 0% 0% / 0.1) inset,
-        0 1.5em 1.5em var(--purple350-02);
-      color: var(--white);
-      text-shadow: 0 0 0.25em hsl(0 0% 0% / 0.3);
-      transform-origin: calc(100% + 0.75em) 100%;
-    }
-
-    .chatbot__message--ai .chatbot__message-content {
-      background-color: var(--gray800);
-      box-shadow: 0 1.5em 1.5em hsl(0 0% 0% / 0.1);
-      transform-origin: 0 0;
-    }
-
-    .chatbot__message--ai .chatbot__message-text {
-      animation: text-appear calc(var(--trans-dur) * 2) linear forwards;
-      opacity: 1;
-    }
-
-    .chatbot__message-scroller {
-      flex: 1;
-      overflow: hidden auto;
-      scrollbar-gutter: stable;
-    }
-
-    .chatbot__messages {
-      display: flex;
-      flex-direction: column;
-      padding: 0 1.5em;
-    }
-
     .chatbot__input-box {
       background-color: var(--gray800);
       border-radius: 1.5em;
@@ -463,20 +399,30 @@
       padding: 0.75em;
       position: relative;
       width: calc(100% - 3em);
-      transition: background-color var(--trans-dur);
     }
 
-    .chatbot__input-box::before {
-      background-color: var(--gray900);
-      mask-image: linear-gradient(hsl(0 0% 0% / 0), hsl(0 0% 0%));
-      -webkit-mask-image: linear-gradient(hsl(0 0% 0% / 0), hsl(0 0% 0%));
-      content: "";
-      display: block;
-      position: absolute;
-      inset: auto 0 100% 0;
-      inset-inline: -1.5em -0.625em;
-      height: 1.5em;
-      transition: background-color var(--trans-dur);
+    .chatbot__suggestion-tags {
+      display: flex;
+      gap: 0.5em;
+      flex-wrap: wrap;
+      margin-bottom: 0.75em;
+    }
+
+    .chatbot__suggestion-tag {
+      background-color: var(--gray700);
+      border-radius: 0.375em;
+      color: var(--gray150);
+      cursor: pointer;
+      padding: 0 0.5em;
+    }
+
+    .chatbot__suggestion-tag:not(:disabled):hover {
+      background-color: var(--gray50);
+      color: var(--gray900);
+    }
+
+    .chatbot__textarea-wrapper {
+      position: relative;
     }
 
     .chatbot__textarea {
@@ -493,14 +439,6 @@
       width: 100%;
     }
 
-    .chatbot__textarea::placeholder {
-      color: var(--gray400);
-    }
-
-    .chatbot__textarea-wrapper {
-      position: relative;
-    }
-
     .chatbot__globe-button {
       background: transparent;
       color: var(--gray300);
@@ -515,10 +453,6 @@
       height: 1.5em;
     }
 
-    .chatbot__globe-button:hover {
-      color: var(--gray100);
-    }
-
     .chatbot__globe-icon {
       width: 1em;
       height: 1em;
@@ -526,8 +460,49 @@
       fill: currentColor;
     }
 
-    .chatbot__welcome[hidden] {
-      display: none;
+    .chatbot__typing-label {
+      color: var(--gray300);
+      font-size: 0.8em;
+      margin-top: 0.2em;
+    }
+
+    .chatbot__loader {
+      margin: 0.375em 0;
+      width: 1.5em;
+      height: 1.5em;
+      color: var(--white);
+    }
+
+    .chatbot__loader-line {
+      animation: loader-line 1s linear infinite;
+    }
+
+    .chatbot__loader-line:nth-child(1) { animation-delay: -0.125s; }
+    .chatbot__loader-line:nth-child(2) { animation-delay: -0.25s; }
+    .chatbot__loader-line:nth-child(3) { animation-delay: -0.375s; }
+    .chatbot__loader-line:nth-child(4) { animation-delay: -0.5s; }
+    .chatbot__loader-line:nth-child(5) { animation-delay: -0.625s; }
+    .chatbot__loader-line:nth-child(6) { animation-delay: -0.75s; }
+    .chatbot__loader-line:nth-child(7) { animation-delay: -0.875s; }
+    .chatbot__loader-line:nth-child(8) { animation-delay: -1s; }
+
+    .chatbot__top-actions {
+      display: flex;
+      justify-content: center;
+      gap: 0.75em;
+      margin-top: 1rem;
+    }
+
+    .chatbot__mini-btn {
+      background: var(--gray700);
+      color: var(--gray100);
+      border-radius: 999px;
+      padding: 0.55em 0.9em;
+      cursor: pointer;
+    }
+
+    .chatbot__mini-btn:hover {
+      background: var(--gray600);
     }
 
     @keyframes icon-appear {
@@ -553,20 +528,11 @@
     @keyframes message-appear {
       from {
         opacity: 0;
-        transform: scale(0);
+        transform: scale(0.96);
       }
       to {
         opacity: 1;
         transform: scale(1);
-      }
-    }
-
-    @keyframes text-appear {
-      from, 50% {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
       }
     }
 
@@ -604,7 +570,7 @@
           </div>
         </div>
         <h1 class="chatbot__title">For Angel, from Beloved</h1>
-        <p class="chatbot__subtitle">Same original layout feel, now wired for a real AI backend on Vercel.</p>
+        <p class="chatbot__subtitle">Real AI version with memory, saved chat, fallback models, and a softer personality.</p>
 
         <div class="chatbot__suggestions-box">
           <button class="chatbot__suggestion" data-send="How much does Beloved adore Angel?">How much does Beloved adore Angel?</button>
@@ -628,6 +594,11 @@
             </button>
           </div>
         </div>
+
+        <div class="chatbot__top-actions">
+          <button class="chatbot__mini-btn" id="openSavedChat">Open saved chat</button>
+          <button class="chatbot__mini-btn" id="clearSavedChat">Clear saved chat</button>
+        </div>
       </div>
 
       <div class="chatbot__conversation" id="conversation">
@@ -640,6 +611,7 @@
             <button class="chatbot__suggestion-tag" type="button" data-send="Tell Angel why Beloved smiles around her">Tell me more</button>
             <button class="chatbot__suggestion-tag" type="button" data-send="Make Angel smile with something playful">Make me smile</button>
             <button class="chatbot__suggestion-tag" type="button" data-send="Write Angel another sweet message">Another one</button>
+            <button class="chatbot__suggestion-tag" type="button" data-send="Comfort Angel softly">Comfort me</button>
           </div>
 
           <div class="chatbot__textarea-wrapper">
@@ -684,7 +656,7 @@
       </div>
       <div class="chatbot__message-content">
         <span class="chatbot__message-role">Beloved Bot</span>
-        <svg class="chatbot__loader lucide lucide-loader-icon lucide-loader" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <svg class="chatbot__loader" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path class="chatbot__loader-line" d="m4.9 4.9 2.9 2.9"></path>
           <path class="chatbot__loader-line" d="M2 12h4"></path>
           <path class="chatbot__loader-line" d="m4.9 19.1 2.9-2.9"></path>
@@ -694,11 +666,13 @@
           <path class="chatbot__loader-line" d="m16.2 7.8 2.9-2.9"></path>
           <path class="chatbot__loader-line" d="M12 2v4"></path>
         </svg>
+        <div class="chatbot__typing-label">Beloved Bot is typing...</div>
       </div>
     </div>
   </template>
 
   <script>
+    const STORAGE_KEY = "beloved_bot_chat_history_v2";
     const welcome = document.getElementById("welcome");
     const conversation = document.getElementById("conversation");
     const messages = document.getElementById("messages");
@@ -708,133 +682,31 @@
     const welcomeSubmit = document.getElementById("welcomeSubmit");
     const chatSubmit = document.getElementById("chatSubmit");
     const loaderTemplate = document.getElementById("loader-template");
-
-    const placeholder = "Hi Beloved Bot...";
-    const responseGroups = {
-      adore: [
-        "Angel, Beloved adores the way your smile quietly changes the whole mood.",
-        "Angel, Beloved adores how naturally lovely you are without even trying.",
-        "Angel, Beloved adores how your presence can make a regular moment feel soft and special.",
-        "Angel, Beloved adores that your smile keeps showing up in his thoughts.",
-        "Angel, Beloved adores the way you make warmth feel easy.",
-        "Angel, Beloved adores your energy, your softness, and the way you stay on his mind.",
-        "Angel, Beloved adores how one little smile from you can improve a whole day.",
-        "Angel, Beloved adores how easy it is to admire you.",
-        "Angel, Beloved adores the way you carry both sweetness and quiet strength.",
-        "Angel, Beloved adores you in all the small ways that keep adding up."
-      ],
-      smile: [
-        "Angel, your smile has a bad habit of making Beloved smile back immediately.",
-        "Angel, your smile is soft, unfair, and very effective.",
-        "Angel, your smile is the kind that interrupts a normal day in the best way.",
-        "Angel, Beloved thinks your smile should come with a warning label for sudden happiness.",
-        "Angel, your smile keeps acting like it owns space in Beloved's mind.",
-        "Angel, your smile really knows how to ruin Beloved's attempts to stay calm.",
-        "Angel, one smile from you and suddenly Beloved is having a much better day.",
-        "Angel, your smile makes quiet moments feel warmer.",
-        "Angel, your smile is dangerous in a very lovely way.",
-        "Angel, Beloved is still trying to act normal around that smile of yours."
-      ],
-      sweet: [
-        "My Angel,\n\nYou have a way of making ordinary moments feel softer.\nBeloved likes how your presence feels calm, warm, and easy to appreciate.\nYou stay on the heart in the gentlest way.",
-        "My Angel,\n\nBeloved likes the way your smile can change the mood of a moment.\nThere is something very sweet about you that lingers long after the conversation ends.",
-        "My Angel,\n\nYou make things feel lighter.\nBeloved likes your softness, your energy, and the little way you make everything feel more special.",
-        "My Angel,\n\nBeloved thinks you are easy to admire and even easier to miss.\nThat is your effect.",
-        "My Angel,\n\nYou have a lovely way of being remembered even in quiet moments.\nBeloved just wanted you to know that."
-      ],
-      playful: [
-        "Angel, Beloved was trying to be productive, but then your face entered the conversation.",
-        "Angel, this is Beloved filing a complaint: you are too easy to think about.",
-        "Angel, your smile keeps interfering with Beloved's plan to be normal.",
-        "Angel, Beloved would behave, but then you go and be lovely.",
-        "Angel, you are suspiciously good at making Beloved grin for no reason.",
-        "Angel, Beloved blames your smile for all this softness.",
-        "Angel, it is becoming difficult for Beloved to act composed when you are being this cute.",
-        "Angel, you really do move through Beloved's mind like you pay rent there.",
-        "Angel, Beloved was calm five minutes ago. Then you smiled.",
-        "Angel, your face has entirely too much influence over Beloved's mood."
-      ],
-      pretty: [
-        "Angel, Beloved thinks you are pretty in a way that stays in the mind.",
-        "Angel, your beauty feels soft and striking at the same time.",
-        "Angel, Beloved thinks you carry yourself in a quietly beautiful way.",
-        "Angel, you have the kind of beauty that lingers after the moment passes.",
-        "Angel, Beloved notices your prettiness even in the smallest moments.",
-        "Angel, you are lovely in a way Beloved finds hard to ignore.",
-        "Angel, Beloved thinks your smile and your face work together to cause problems for his focus.",
-        "Angel, you have a gentle kind of beauty Beloved really likes."
-      ],
-      why: [
-        "Beloved likes Angel because you feel genuine and easy to appreciate.",
-        "Beloved likes Angel because your smile feels like relief after a long day.",
-        "Beloved likes Angel because your presence feels warm without trying too hard.",
-        "Beloved likes Angel because you make little moments feel like they matter.",
-        "Beloved likes Angel because your softness never feels fake.",
-        "Beloved likes Angel because your energy stays on the heart.",
-        "Beloved likes Angel because being around you feels calm and good.",
-        "Beloved likes Angel because you are lovely in both the obvious and quiet ways."
-      ],
-      default: [
-        "Angel, Beloved thinks you make the day softer just by being in it.",
-        "Angel, Beloved likes how naturally you can make a moment feel lighter.",
-        "Angel, even a small thought of you can make Beloved smile.",
-        "Angel, you are very easy for Beloved to think about in a warm way.",
-        "Angel, Beloved hopes this makes you smile a little.",
-        "Angel, your vibe is sweet, calm, and very easy to appreciate.",
-        "Angel, Beloved thinks you deserve gentle words and nice moments.",
-        "Angel, you stay on Beloved's mind in a soft way.",
-        "Angel, Beloved still thinks your smile is one of your strongest weapons.",
-        "Angel, this is your reminder that you are very lovely to Beloved."
-      ]
-    };
+    const openSavedChatBtn = document.getElementById("openSavedChat");
+    const clearSavedChatBtn = document.getElementById("clearSavedChat");
 
     let loadingNode = null;
+    let chatHistory = [];
 
-    function randomFrom(list) {
-      return list[Math.floor(Math.random() * list.length)];
+    function saveChatHistory() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(chatHistory));
     }
 
-    function detectGroup(text) {
-      const value = text.toLowerCase();
-
-      if (value.includes("adore") || value.includes("love") || value.includes("how much")) return "adore";
-      if (value.includes("smile") || value.includes("happy") || value.includes("grin")) return "smile";
-      if (value.includes("sweet") || value.includes("message") || value.includes("write")) return "sweet";
-      if (value.includes("playful") || value.includes("funny") || value.includes("tease")) return "playful";
-      if (value.includes("pretty") || value.includes("beautiful") || value.includes("gorgeous") || value.includes("lovely")) return "pretty";
-      if (value.includes("why")) return "why";
-      return "default";
-    }
-
-    async function generateReply(text) {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ message: text })
-      });
-
-      if (!response.ok) {
-        let message = "Beloved Bot couldn't reply right now.";
-        try {
-          const data = await response.json();
-          if (data && data.error) message = data.error;
-        } catch (error) {}
-        throw new Error(message);
+    function loadChatHistory() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
       }
-
-      const data = await response.json();
-      return data.reply || "Beloved Bot is quiet right now.";
     }
 
     function showConversation() {
       welcome.hidden = true;
       conversation.classList.add("is-visible");
-      chatTextarea.placeholder = placeholder;
-      setTimeout(() => {
-        chatTextarea.focus();
-      }, 30);
+      setTimeout(() => chatTextarea.focus(), 30);
     }
 
     function createIcon(kind) {
@@ -851,11 +723,10 @@
           </div>
         `;
       }
-
       return "";
     }
 
-    function appendMessage(role, content) {
+    function appendMessage(role, content, persist = true) {
       const wrap = document.createElement("div");
       wrap.className = `chatbot__message chatbot__message--${role}`;
 
@@ -877,6 +748,21 @@
       wrap.querySelector(".chatbot__message-text").textContent = content;
       messages.appendChild(wrap);
       scroller.scrollTo({ top: scroller.scrollHeight, left: 0, behavior: "smooth" });
+
+      if (persist) {
+        chatHistory.push({ role, content });
+        saveChatHistory();
+      }
+    }
+
+    function renderSavedHistory() {
+      messages.innerHTML = "";
+      if (!chatHistory.length) return;
+      showConversation();
+      for (const item of chatHistory) {
+        appendMessage(item.role, item.content, false);
+      }
+      scroller.scrollTo({ top: scroller.scrollHeight, left: 0, behavior: "auto" });
     }
 
     function showLoader() {
@@ -906,6 +792,42 @@
       chatTextarea.style.height = Math.max(144, Math.min(chatTextarea.scrollHeight, 260)) + "px";
     }
 
+    function getRecentMemory(limit = 8) {
+      return chatHistory.slice(-limit);
+    }
+
+    async function getAIReply(text) {
+      const recentMessages = getRecentMemory(8).map(item => ({
+        role: item.role === "ai" ? "assistant" : "user",
+        content: item.content
+      }));
+
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: text,
+          history: recentMessages
+        })
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Beloved Bot couldn't reply right now.");
+      }
+
+      return data?.reply || "Beloved Bot is quiet right now.";
+    }
+
+    function getTypingDelay(text) {
+      const base = 700;
+      const extra = Math.min((text?.length || 0) * 9, 1200);
+      return base + extra;
+    }
+
     async function sendMessage(text, source) {
       const messageText = (text || "").trim();
       if (!messageText) return;
@@ -924,14 +846,20 @@
       showLoader();
 
       try {
-        const reply = await generateReply(messageText);
-        hideLoader();
-        appendMessage("ai", reply);
+        const reply = await getAIReply(messageText);
+        const delay = getTypingDelay(reply);
+
+        setTimeout(() => {
+          hideLoader();
+          appendMessage("ai", reply);
+          setButtonsDisabled(false);
+        }, delay);
       } catch (error) {
-        hideLoader();
-        appendMessage("ai", error.message || "Beloved Bot had a little issue replying.");
-      } finally {
-        setButtonsDisabled(false);
+        setTimeout(() => {
+          hideLoader();
+          appendMessage("ai", error.message || "Beloved Bot had a little issue replying.");
+          setButtonsDisabled(false);
+        }, 900);
       }
     }
 
@@ -969,6 +897,24 @@
         sendMessage(text, button.closest(".chatbot__welcome") ? "welcome" : "chat");
       });
     });
+
+    openSavedChatBtn.addEventListener("click", () => {
+      chatHistory = loadChatHistory();
+      renderSavedHistory();
+    });
+
+    clearSavedChatBtn.addEventListener("click", () => {
+      localStorage.removeItem(STORAGE_KEY);
+      chatHistory = [];
+      messages.innerHTML = "";
+      conversation.classList.remove("is-visible");
+      welcome.hidden = false;
+    });
+
+    chatHistory = loadChatHistory();
+    if (chatHistory.length) {
+      renderSavedHistory();
+    }
   </script>
 </body>
 </html>
