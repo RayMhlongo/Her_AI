@@ -25,7 +25,7 @@ export default async function handler(req, res) {
       "google/gemma-3n-e4b-it:free"
     ];
 
-    const safeHistory = Array.isArray(history) ? history.slice(-8) : [];
+    const safeHistory = Array.isArray(history) ? history.slice(-4) : [];
 
     const systemPrompt = [
       "You are Beloved Bot.",
