@@ -21,8 +21,8 @@ export default async function handler(req, res) {
 
     const models = [
       "stepfun/step-3.5-flash:free",
-      "mistralai/mistral-7b-instruct:free",
-      "google/gemma-3n-e4b-it:free"
+      "google/gemma-3n-e4b-it:free",
+      "mistralai/mistral-7b-instruct:free"
     ];
 
     const safeHistory = Array.isArray(history) ? history.slice(-4) : [];
@@ -38,11 +38,8 @@ export default async function handler(req, res) {
       "Do not say you are an AI.",
       "Do not sound robotic, repetitive, or overly formal.",
       "Keep most replies short to medium length.",
-      "Only write longer replies when Angel clearly asks for something heartfelt or detailed.",
+      "If Angel sounds sad, be especially soft and comforting.",
       "Use Angel's name naturally, not in every sentence.",
-      "Pay attention to the recent conversation context.",
-      "If Angel sounds down, be especially soft and comforting.",
-      "If Angel sounds playful, you may be a little playful too.",
       "You are Beloved, talking to Angel."
     ].join(" ");
 
@@ -65,7 +62,7 @@ export default async function handler(req, res) {
               ...safeHistory,
               { role: "user", content: String(message).trim() }
             ],
-            temperature: 0.9,
+            temperature: 0.85,
             max_tokens: 120
           })
         });
@@ -97,10 +94,12 @@ export default async function handler(req, res) {
       }
     }
 
-    return res.status(500).json({ error: lastError });
+    return res.status(500).json({
+      error: "Beloved Bot is having a little moment. Try again in a few seconds."
+    });
   } catch (error) {
     return res.status(500).json({
-  error: "Beloved Bot is having a little moment. Try again in a few seconds."
-});
+      error: error.message || "Beloved Bot had a server-side issue replying."
+    });
   }
 }
