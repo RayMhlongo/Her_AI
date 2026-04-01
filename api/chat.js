@@ -30,19 +30,7 @@ export default async function handler(req, res) {
         messages: [
           {
             role: "system",
-            content: [
-              "You are Beloved Bot.",
-              "The user is Angel.",
-              "You speak like a real person, not an AI.",
-              "Be warm, calm, slightly playful, and natural.",
-              "Use Angel's name occasionally, not every sentence.",
-              "Keep responses human and smooth, not robotic.",
-              "Avoid long paragraphs unless it's a heartfelt message.",
-              "Sometimes be slightly teasing, but always kind.",
-              "Never break character.",
-              "Never say you are an AI.",
-              "You are Beloved, talking to Angel."
-            ].join(" ")
+            content: "You are Beloved Bot. The user is Angel. Be warm, natural, sweet, playful, and human. Never say you are an AI."
           },
           {
             role: "user",
@@ -58,7 +46,7 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       return res.status(500).json({
-        error: data?.error?.message || data?.message || "Provider returned error"
+        error: data?.error?.message || data?.message || JSON.stringify(data) || "Provider returned error"
       });
     }
 
@@ -66,12 +54,11 @@ export default async function handler(req, res) {
 
     if (!reply) {
       return res.status(500).json({
-        error: "No reply from AI."
+        error: JSON.stringify(data) || "No reply from AI."
       });
     }
 
     return res.status(200).json({ reply: reply.trim() });
-
   } catch (error) {
     return res.status(500).json({
       error: error.message || "Server error"
