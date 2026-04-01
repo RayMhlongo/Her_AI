@@ -56,15 +56,16 @@ export default async function handler(req, res) {
             "X-Title": "Beloved Bot"
           },
           body: JSON.stringify({
-  model,
-  messages: [
-    { role: "system", content: systemPrompt },
-    ...safeHistory,
-    { role: "user", content: String(message).trim() }
-  ],
-  temperature: 0.8,
-  max_tokens: 220
-})
+            model,
+            messages: [
+              { role: "system", content: systemPrompt },
+              ...safeHistory,
+              { role: "user", content: String(message).trim() }
+            ],
+            temperature: 0.8,
+            max_tokens: 220
+          })
+        });
 
         const data = await response.json().catch(() => ({}));
 
