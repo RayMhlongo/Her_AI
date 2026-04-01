@@ -294,6 +294,12 @@
       display: flex;
     }
 
+    .chatbot__chat-header {
+      display: flex;
+      justify-content: flex-end;
+      padding: 1rem 1.5rem 0;
+    }
+
     .chatbot__message-scroller {
       flex: 1;
       overflow: hidden auto;
@@ -553,6 +559,9 @@
       .chatbot__textarea {
         min-height: 7.5em;
       }
+      .chatbot__chat-header {
+        padding: 0.75rem 0.75rem 0;
+      }
     }
   </style>
 </head>
@@ -573,10 +582,6 @@
         <p class="chatbot__subtitle">Real AI version with memory, saved chat, fallback models, and a softer personality.</p>
 
         <div class="chatbot__suggestions-box">
-          <button class="chatbot__suggestion" data-send="How much does Beloved adore Angel?">How much does Beloved adore Angel?</button>
-          <button class="chatbot__suggestion" data-send="What makes Angel smile?">What makes Angel smile?</button>
-          <button class="chatbot__suggestion" data-send="Write Angel something sweet">Write Angel something sweet</button>
-
           <div class="chatbot__input-wrapper">
             <label class="chatbot__label" for="chat-input">Message</label>
             <input
@@ -602,6 +607,10 @@
       </div>
 
       <div class="chatbot__conversation" id="conversation">
+        <div class="chatbot__chat-header">
+          <button class="chatbot__mini-btn" id="clearChatBtn">Clear chat</button>
+        </div>
+
         <div class="chatbot__message-scroller" id="scroller">
           <div class="chatbot__messages" id="messages"></div>
         </div>
@@ -684,6 +693,7 @@
     const loaderTemplate = document.getElementById("loader-template");
     const openSavedChatBtn = document.getElementById("openSavedChat");
     const clearSavedChatBtn = document.getElementById("clearSavedChat");
+    const clearChatBtn = document.getElementById("clearChatBtn");
 
     let loadingNode = null;
     let chatHistory = [];
@@ -701,6 +711,21 @@
       } catch {
         return [];
       }
+    }
+
+    function resetToWelcome() {
+      hideLoader();
+      messages.innerHTML = "";
+      conversation.classList.remove("is-visible");
+      welcome.hidden = false;
+      welcomeInput.value = "";
+      chatTextarea.value = "";
+    }
+
+    function clearAllChat() {
+      localStorage.removeItem(STORAGE_KEY);
+      chatHistory = [];
+      resetToWelcome();
     }
 
     function showConversation() {
@@ -785,6 +810,7 @@
       document.querySelectorAll("[data-send]").forEach((button) => {
         button.disabled = state;
       });
+      if (clearChatBtn) clearChatBtn.disabled = state;
     }
 
     function autoResizeTextarea() {
@@ -903,13 +929,8 @@
       renderSavedHistory();
     });
 
-    clearSavedChatBtn.addEventListener("click", () => {
-      localStorage.removeItem(STORAGE_KEY);
-      chatHistory = [];
-      messages.innerHTML = "";
-      conversation.classList.remove("is-visible");
-      welcome.hidden = false;
-    });
+    clearSavedChatBtn.addEventListener("click", clearAllChat);
+    clearChatBtn.addEventListener("click", clearAllChat);
 
     chatHistory = loadChatHistory();
     if (chatHistory.length) {
