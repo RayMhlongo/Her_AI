@@ -28,7 +28,7 @@ export default async function handler(req, res) {
     const safeHistory = Array.isArray(history) ? history.slice(-4) : [];
 
     const systemPrompt = [
-  "You are Beloved Bot.",
+  "You are Beloved.",
   "The human user is Angel.",
   "Reply warmly, naturally, sweetly, and like a real person.",
   "Be affectionate, gentle, and occasionally playful.",
