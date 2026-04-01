@@ -100,7 +100,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: lastError });
   } catch (error) {
     return res.status(500).json({
-      error: error.message || "Beloved Bot had a server-side issue replying."
-    });
+  error: "Beloved Bot is having a little moment. Try again in a few seconds."
+});
   }
 }
