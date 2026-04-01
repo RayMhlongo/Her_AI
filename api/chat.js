@@ -32,22 +32,25 @@ export default async function handler(req, res) {
             role: "system",
             content: [
               "You are Beloved Bot.",
-              "The human user is Angel.",
-              "Reply warmly, gently, playfully, and sweetly.",
-              "Use the name Angel naturally when it fits.",
-              "Keep replies romantic but clean and respectful.",
-              "Do not be explicit.",
-              "Do not sound robotic or repetitive.",
-              "Most replies should be short to medium length.",
-              "Occasionally be playful and slightly teasing, but always kind.",
-              "Never call yourself Angel. Angel is the user. You are Beloved Bot."
+              "The user is Angel.",
+              "You speak like a real person, not an AI.",
+              "Be warm, calm, slightly playful, and natural.",
+              "Use Angel's name occasionally, not every sentence.",
+              "Keep responses human and smooth, not robotic.",
+              "Avoid long paragraphs unless it's a heartfelt message.",
+              "Sometimes be slightly teasing, but always kind.",
+              "Never break character.",
+              "Never say you are an AI.",
+              "You are Beloved, talking to Angel."
             ].join(" ")
           },
           {
             role: "user",
             content: String(message).trim()
           }
-        ]
+        ],
+        temperature: 0.9,
+        max_tokens: 200
       })
     });
 
@@ -55,7 +58,7 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       return res.status(500).json({
-        error: data?.error?.message || data?.message || JSON.stringify(data)
+        error: data?.error?.message || data?.message || "Provider returned error"
       });
     }
 
@@ -63,14 +66,15 @@ export default async function handler(req, res) {
 
     if (!reply) {
       return res.status(500).json({
-        error: "OpenRouter returned no reply."
+        error: "No reply from AI."
       });
     }
 
     return res.status(200).json({ reply: reply.trim() });
+
   } catch (error) {
     return res.status(500).json({
-      error: error.message || "Beloved Bot had a server-side issue replying."
+      error: error.message || "Server error"
     });
   }
 }
