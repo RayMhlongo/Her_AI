@@ -10,80 +10,67 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Message is required." });
     }
 
-    const AI_BASE_URL = process.env.AI_BASE_URL;
     const AI_API_KEY = process.env.AI_API_KEY;
-    const AI_MODEL = process.env.AI_MODEL;
     const SITE_URL = process.env.SITE_URL || "https://example.vercel.app";
 
-    if (!AI_BASE_URL || !AI_API_KEY || !AI_MODEL) {
-      return res.status(500).json({
-        error: "Missing AI_BASE_URL, AI_API_KEY, or AI_MODEL in Vercel environment variables."
-      });
+    if (!AI_API_KEY) {
+      return res.status(500).json({ error: "Missing AI_API_KEY in Vercel environment variables." });
     }
 
-    const systemPrompt = [
-      "You are Beloved Bot.",
-      "The human user is Angel.",
-      "Reply warmly, gently, playfully, and sweetly.",
-      "Use the name Angel naturally when it fits.",
-      "Keep replies romantic but clean and respectful.",
-      "Do not be explicit.",
-      "Do not be robotic or repetitive.",
-      "Most replies should be short to medium length.",
-      "Occasionally be playful and slightly teasing, but always kind.",
-      "Never call yourself Angel. Angel is the user. You are Beloved Bot."
-    ].join(" ");
-
-    const endpoint = `${AI_BASE_URL.replace(/\/$/, "")}/chat/completions`;
-
-    const aiResponse = await fetch(endpoint, {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         "Authorization": `Bearer ${AI_API_KEY}`,
+        "Content-Type": "application/json",
         "HTTP-Referer": SITE_URL,
         "X-Title": "Beloved Bot"
       },
       body: JSON.stringify({
-        model: AI_MODEL,
+        model: "stepfun/step-3.5-flash:free",
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: String(message).trim() }
-        ],
-        temperature: 0.9,
-        max_tokens: 220
+          {
+            role: "system",
+            content: [
+              "You are Beloved Bot.",
+              "The human user is Angel.",
+              "Reply warmly, gently, playfully, and sweetly.",
+              "Use the name Angel naturally when it fits.",
+              "Keep replies romantic but clean and respectful.",
+              "Do not be explicit.",
+              "Do not sound robotic or repetitive.",
+              "Most replies should be short to medium length.",
+              "Occasionally be playful and slightly teasing, but always kind.",
+              "Never call yourself Angel. Angel is the user. You are Beloved Bot."
+            ].join(" ")
+          },
+          {
+            role: "user",
+            content: String(message).trim()
+          }
+        ]
       })
     });
 
-    const data = await aiResponse.json().catch(() => ({}));
+    const data = await response.json().catch(() => ({}));
 
-    if (!aiResponse.ok) {
-      const providerMessage =
-        data?.error?.message ||
-        data?.message ||
-        "The AI provider rejected the request.";
-
-      console.error("AI provider error:", data);
-      return res.status(500).json({ error: providerMessage });
+    if (!response.ok) {
+      return res.status(500).json({
+        error: data?.error?.message || data?.message || JSON.stringify(data)
+      });
     }
 
-    const reply =
-      data?.choices?.[0]?.message?.content ||
-      data?.choices?.[0]?.text ||
-      "";
+    const reply = data?.choices?.[0]?.message?.content;
 
     if (!reply) {
-      console.error("Unexpected AI response:", data);
       return res.status(500).json({
-        error: "The AI provider returned an unexpected response."
+        error: "OpenRouter returned no reply."
       });
     }
 
     return res.status(200).json({ reply: reply.trim() });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({
-      error: "Beloved Bot had a server-side issue replying."
+      error: error.message || "Beloved Bot had a server-side issue replying."
     });
   }
 }
