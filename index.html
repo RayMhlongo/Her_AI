@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>For Phathutshedzo Hope, from Beloved</title>
+  <title>For Angel, from Beloved</title>
   <style>
     * {
       border: 0;
@@ -603,13 +603,13 @@
             </svg>
           </div>
         </div>
-        <h1 class="chatbot__title">Phathutshedzo Hope, from Beloved</h1>
-        <p class="chatbot__subtitle">Same original layout feel, but now Angel is the user and Beloved Bot replies.</p>
+        <h1 class="chatbot__title">For Angel, from Beloved</h1>
+        <p class="chatbot__subtitle">Same original layout feel, now wired for a real AI backend on Vercel.</p>
 
         <div class="chatbot__suggestions-box">
-          <button class="chatbot__suggestion" data-send="How much does Beloved adore Angel?">How much does Beloved adore Phathutshedzo Hope?</button>
-          <button class="chatbot__suggestion" data-send="What makes Angel smile?">What makes Phathutshedzo Hope smile?</button>
-          <button class="chatbot__suggestion" data-send="Write Angel something sweet">Write Phathutshedzo Hope something sweet</button>
+          <button class="chatbot__suggestion" data-send="How much does Beloved adore Angel?">How much does Beloved adore Angel?</button>
+          <button class="chatbot__suggestion" data-send="What makes Angel smile?">What makes Angel smile?</button>
+          <button class="chatbot__suggestion" data-send="Write Angel something sweet">Write Angel something sweet</button>
 
           <div class="chatbot__input-wrapper">
             <label class="chatbot__label" for="chat-input">Message</label>
@@ -806,16 +806,26 @@
       return "default";
     }
 
-    function generateReply(text) {
-      const group = detectGroup(text);
-      let reply = randomFrom(responseGroups[group]);
+    async function generateReply(text) {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: text })
+      });
 
-      if (Math.random() < 0.28 && group !== "default") {
-        const extra = randomFrom(responseGroups.default);
-        if (extra !== reply) reply += "\n\n" + extra;
+      if (!response.ok) {
+        let message = "Beloved Bot couldn't reply right now.";
+        try {
+          const data = await response.json();
+          if (data && data.error) message = data.error;
+        } catch (error) {}
+        throw new Error(message);
       }
 
-      return reply;
+      const data = await response.json();
+      return data.reply || "Beloved Bot is quiet right now.";
     }
 
     function showConversation() {
@@ -896,7 +906,7 @@
       chatTextarea.style.height = Math.max(144, Math.min(chatTextarea.scrollHeight, 260)) + "px";
     }
 
-    function sendMessage(text, source) {
+    async function sendMessage(text, source) {
       const messageText = (text || "").trim();
       if (!messageText) return;
 
@@ -913,11 +923,16 @@
       setButtonsDisabled(true);
       showLoader();
 
-      setTimeout(() => {
+      try {
+        const reply = await generateReply(messageText);
         hideLoader();
-        appendMessage("ai", generateReply(messageText));
+        appendMessage("ai", reply);
+      } catch (error) {
+        hideLoader();
+        appendMessage("ai", error.message || "Beloved Bot had a little issue replying.");
+      } finally {
         setButtonsDisabled(false);
-      }, 900 + Math.random() * 600);
+      }
     }
 
     function sendFromWelcome() {
