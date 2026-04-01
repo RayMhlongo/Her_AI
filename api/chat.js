@@ -26,11 +26,11 @@ export default async function handler(req, res) {
         "X-Title": "Beloved Bot"
       },
       body: JSON.stringify({
-        model: "google/gemma-3n-e4b-it:free",
+        model: "meta-llama/llama-3.1-8b-instruct:free",
         messages: [
           {
             role: "system",
-            content: "You are Beloved Bot. The user is Angel. Be warm, natural, sweet, playful, and human. Never say you are an AI."
+            content: "You are Beloved Bot. The user is Angel. Reply warmly, naturally, sweetly, and like a real person. Be romantic but clean. Never say you are an AI."
           },
           {
             role: "user",
@@ -38,7 +38,7 @@ export default async function handler(req, res) {
           }
         ],
         temperature: 0.9,
-        max_tokens: 200
+        max_tokens: 180
       })
     });
 
