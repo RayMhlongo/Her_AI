@@ -26,7 +26,7 @@ export default async function handler(req, res) {
         "X-Title": "Beloved Bot"
       },
       body: JSON.stringify({
-        model: "stepfun/step-3.5-flash:free",
+        model: "google/gemma-3n-e4b-it:free",
         messages: [
           {
             role: "system",
